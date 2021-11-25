@@ -1,0 +1,25 @@
+from pymouse import *     # 模拟鼠标所使用的包
+from pykeyboard import *   # 模拟键盘所使用的包
+import time   # 连续进行两个动作可能太快而效果不明显，因此加入暂停时间
+
+m = PyMouse()   # 鼠标的实例m
+k = PyKeyboard()   # 键盘的实例k
+
+
+for i in range(1):
+    #  延迟
+    time.sleep(35 * 60)  # 延迟1s
+    #  激活右下角微信角标
+    m.click(1800, 1145, 1, 1)
+    time.sleep(0.5)
+    #  激活发送窗口
+    m.click(1500, 800, 1, 1)
+    #  输入
+    k.type_string('nasanfang   xueshengzheng ')   # 模拟键盘输入字符串
+    #  发送
+    k.press_key(13)   #模拟键盘按Enter键
+    k.release_key(13)   #模拟键盘松开Enter键
+
+
+
+print('end')
