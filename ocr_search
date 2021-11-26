@@ -1,0 +1,52 @@
+import keyboard
+import time
+import PIL.ImageGrab
+from aip import AipOcr
+from selenium.webdriver import Chrome
+from selenium.webdriver import ChromeOptions
+import os
+
+#  首先打开一个chrome浏览器
+option = ChromeOptions()
+option.add_experimental_option('excludeSwitches', ['enable-automation'])
+driver = Chrome(options=option)
+url = 'http://www.baidu.com'
+
+while 1:
+    #  等待调用snipaste并完成图片截图和复制到剪贴板
+    keyboard.wait(hotkey="ctrl+alt+z")  # snipaste的快捷键，用于截图
+    keyboard.wait(hotkey="ctrl+c")  # 需要复制到剪贴板才能被保存下来
+    time.sleep(0.5)  # 必须延时，保证当前照片写入到剪贴板
+
+    # 保存图片，设置时间名称，到当前路径
+    name = time.strftime("%Y.%m.%d_%H.%M.%S", time.localtime())
+    img=PIL.ImageGrab.grabclipboard()
+    img.save(name + ".png", "png")
+
+    #  百度api  教程https://ai.baidu.com/ai-doc/OCR/wkibizyjk
+    APP_ID = '11355052'
+    API_KEY = '***************'
+    SECRET_KEY = '****************'
+    client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
+
+    #  获取要搜索的内容,并删除保存的截图
+    toSearch = ""
+    with open(name + ".png",'rb') as f:
+        image = f.read()
+        # 调用百度API通用文字识别（高精度版），提取图片中的内容
+        text = client.basicAccurate(image)
+        result = text["words_result"]
+        #  保存好要搜素的字符串
+        for i in result:
+            toSearch += i["words"]
+        print(toSearch)
+    os.remove(name + ".png")
+
+    #  浏览器访问百度并搜索
+    driver.get(url)
+    time.sleep(0.5)
+    # 找到输入框 （输入框的id是kw）并输入
+    driver.find_element_by_id('kw').send_keys(toSearch)
+    time.sleep(0.5)
+    #  找到搜索按钮（id是su）并点击
+    driver.find_element_by_id('su').click()
