@@ -15,8 +15,8 @@ driver.get(url)
 
 #  百度api  教程https://ai.baidu.com/ai-doc/OCR/wkibizyjk
 APP_ID = '11355052'
-API_KEY = 'mnxspT31kxA3Fh9M2eCQPlsr'
-SECRET_KEY = 'r6qUAZwcadvzOpXUa4CvGBzK5DjLPEdE'
+API_KEY = 'mnx**************QPlsr'
+SECRET_KEY = 'r6qUAZ***********zK5DjLPEdE'
 client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
 while 1:
