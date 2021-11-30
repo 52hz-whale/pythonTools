@@ -11,23 +11,29 @@ option = ChromeOptions()
 option.add_experimental_option('excludeSwitches', ['enable-automation'])
 driver = Chrome(options=option)
 url = 'http://www.baidu.com'
+driver.get(url)
+
+#  百度api  教程https://ai.baidu.com/ai-doc/OCR/wkibizyjk
+APP_ID = '11355052'
+API_KEY = 'mnxspT31kxA3Fh9M2eCQPlsr'
+SECRET_KEY = 'r6qUAZwcadvzOpXUa4CvGBzK5DjLPEdE'
+client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
 while 1:
     #  等待调用snipaste并完成图片截图和复制到剪贴板
     keyboard.wait(hotkey="ctrl+alt+z")  # snipaste的快捷键，用于截图
     keyboard.wait(hotkey="ctrl+c")  # 需要复制到剪贴板才能被保存下来
-    time.sleep(0.5)  # 必须延时，保证当前照片写入到剪贴板
+    #  找到输入框并清空
+    t = driver.find_element_by_id('kw')
+    t.clear()
+    time.sleep(0.1)  # 必须延时，保证当前照片写入到剪贴板
 
     # 保存图片，设置时间名称，到当前路径
     name = time.strftime("%Y.%m.%d_%H.%M.%S", time.localtime())
     img=PIL.ImageGrab.grabclipboard()
     img.save(name + ".png", "png")
 
-    #  百度api  教程https://ai.baidu.com/ai-doc/OCR/wkibizyjk
-    APP_ID = '11355052'
-    API_KEY = '***************'
-    SECRET_KEY = '****************'
-    client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
+
 
     #  获取要搜索的内容,并删除保存的截图
     toSearch = ""
@@ -42,11 +48,7 @@ while 1:
         print(toSearch)
     os.remove(name + ".png")
 
-    #  浏览器访问百度并搜索
-    driver.get(url)
-    time.sleep(0.5)
-    # 找到输入框 （输入框的id是kw）并输入
-    driver.find_element_by_id('kw').send_keys(toSearch)
-    time.sleep(0.5)
+    t.send_keys(toSearch)
+    time.sleep(0.3)
     #  找到搜索按钮（id是su）并点击
     driver.find_element_by_id('su').click()
