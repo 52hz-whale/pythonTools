@@ -1,0 +1,92 @@
+from appium import webdriver
+from selenium.webdriver.common.by import By
+from appium.webdriver.common.touch_action import TouchAction
+import time
+from PIL import Image
+import numpy as np
+
+
+def scroll2end(driver):
+    isBotton = False
+    while not isBotton:
+        driver.save_screenshot('phone1.png')
+
+        actions = TouchAction(driver)
+        actions.press(x=100, y=800).wait(1000).move_to(x=100, y=100).release().perform()
+        time.sleep(0.2)
+
+        driver.save_screenshot('phone2.png')
+        img1, img2 = Image.open('phone1.png'), Image.open('phone2.png')
+        img1, img2 = np.array(img1), np.array(img2)
+        if (img1 == img2).mean() > 0.99:
+            isBotton = True
+
+
+desired_caps = {
+            "platformName": "Android",
+            "platformVersion": "7.1.2",
+            "deviceName": "whale",#
+            "appPackage": "com.lingkou.leetcode",
+            "appActivity": "com.lingkou.main.main.MainActivity",
+            'unicodeKeyboard': True,  # 使用unicodeKeyboard,即Appiuum自带键盘
+            'resetKeyboard': True,  # 重新设置系统键盘为Appium自带键盘
+            'noReset': True, # 每次启动不重置APP,即不执行清空APP数据操作
+}
+
+driver = webdriver.Remote("http://localhost:4723/wd/hub", desired_caps)
+time.sleep(2)
+
+# 任务1 ： 阅读三篇题解
+# 步骤：点击下方”题库“   点击“每日一题”   点击“题解”   查看一个题解  返回
+button_store = driver.find_element(By.XPATH, "//android.widget.LinearLayout/android.widget.LinearLayout[2]")
+button_store.click()
+time.sleep(0.5)
+button_everyday = driver.find_element(By.ID, "com.lingkou.leetcode:id/tv_text")
+button_everyday.click()
+time.sleep(0.5)
+button_solution = driver.find_element(By.XPATH, "//android.widget.TextView[@text='题解']")
+button_solution.click()
+time.sleep(0.5)
+for n in range(3):
+    driver.find_element(By.XPATH,  "//androidx.recyclerview.widget.RecyclerView/android.view.ViewGroup[" + str(n+1) +"]").click()
+    time.sleep(1)
+    driver.find_element(By.ID,  "com.lingkou.leetcode:id/back").click()
+    time.sleep(1)
+time.sleep(0.5)
+
+#  任务2：写一个题解
+#  步骤： 点击“笔记”按钮  向输入框输入   保存按钮   点击空白处返回
+writeOne = driver.find_element(By.XPATH, "//android.widget.LinearLayout[2]/android.widget.ImageButton[1]")
+writeOne.click()
+time.sleep(0.5)
+driver.find_element(By.XPATH, "//android.widget.EditText").set_text("whatever you want to input")
+time.sleep(1)
+driver.find_element(By.ID,  "com.lingkou.leetcode:id/tv_save_edit").click()
+time.sleep(0.5)
+driver.back()
+time.sleep(0.5)
+driver.back()
+
+#  任务3：阅读三篇leetbook
+#  步骤： 点击下方“学习”   选择book
+button_learn = driver.find_element(By.XPATH, "//android.widget.LinearLayout/android.widget.LinearLayout[3]")
+button_learn.click()
+time.sleep(0.5)
+driver.find_element(By.XPATH,  "//android.widget.TextView[@text='算法面试题汇总']").click()
+time.sleep(0.5)
+for i in range(3):
+    scroll2end(driver)
+    driver.find_element(By.XPATH, "//android.widget.TextView[@text='下一页']").click()
+    time.sleep(0.5)
+driver.back()
+driver.back()
+
+#  最后的任务，领取coins
+#  步骤： 点击下方“今天”  点击上方任务按钮  依次领取金币
+button_today = driver.find_element(By.XPATH, "//android.widget.LinearLayout/android.widget.LinearLayout[1]")
+button_today.click()
+time.sleep(0.5)
+driver.find_element(By.ID,  "com.lingkou.leetcode:id/task").click()
+time.sleep(0.5)
+for i in range(2, 6):
+    driver.find_element(By.XPATH,  "//androidx.cardview.widget.CardView[" + str(i) +"]/android.view.ViewGroup/android.widget.TextView[4]").click()
