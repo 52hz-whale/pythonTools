@@ -1,0 +1,59 @@
+import sys
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+import pyautogui
+from pynput.mouse import Listener
+import time
+import threading
+
+
+#  标签类，传入坐标，就能显示坐标了
+class Location(QWidget):
+    def __init__(self, x, y, parent=None):
+        QWidget.__init__(self)
+        # 无边框并且透明背景
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.SubWindow)
+        self.setAutoFillBackground(False)
+        self.setAttribute(Qt.WA_TranslucentBackground, True)
+        #  设置宽， 高
+        self.width = 40
+        self.hight = 60
+        #  新建一个Label并导入图片
+        self.image_label = QLabel(self)
+        self.image = QImage()
+        self.image.load(r'location.png')
+        self.image = self.image.scaled(self.width, self.hight)  # 图片缩放
+        self.image_label.setPixmap(QPixmap.fromImage(self.image))  #  label显示图片
+        self.image_label.setAlignment(Qt.AlignCenter)
+        #  再建一个label显示坐标
+        self.label = QLabel(self)
+        self.label.setStyleSheet("color:black; font:bold 24px")
+        self.label.setText(str(x) + '\n' + str(y))
+        self.label.setAlignment(Qt.AlignLeft)
+        self.resize(self.width + 30, self.hight + 50)
+
+#  给位置，显示图标
+#  注意，一个窗口需要一个线程，因为sys.exit(app.exec_())会阻塞线程，除非一个窗口退出才能显示下一个窗口
+def showIcon(x, y):
+    app = QApplication(sys.argv)
+    t = Location(x, y)
+    #  鼠标的箭头的那个点，和图片的尖点是有差距的，需要矫正
+    t.move(x-18, y-60)
+    t.show()
+    sys.exit(app.exec_())
+
+
+def on_click(x, y, buttion, pressed):
+    if pressed:
+        print((x, y))
+        #  新建一个线程来调用showIcon
+        t = threading.Thread(target=showIcon, args=(x, y))
+        t.start()
+
+
+
+if __name__ == '__main__':
+    #  监听鼠标点击
+    with Listener(on_click=on_click) as listener:
+        listener.join()
